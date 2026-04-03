@@ -16,21 +16,19 @@ async def hablar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not update.message or not update.message.text: return
     user_msg = update.message.text.lower()
     
-    # Lógica de Precios (Solana y Ethereum)
+    # Lógica de Precios
     if any(p in user_msg for p in ["mercado", "precio", "sol", "eth"]):
         try:
             url = "https://api.coingecko.com/api/v3/simple/price?ids=solana,ethereum&vs_currencies=usd"
             data = requests.get(url, timeout=10).json()
-            sol = data['solana']['usd']
-            eth = data['ethereum']['usd']
-            res = f"📊 *Reporte para mi Jefe:* SOL: `${sol}` | ETH: `${eth}`. ¿Invertimos?"
-            await update.message.reply_text(res, parse_mode='Markdown')
+            res = f"📊 SOL: `${data['solana']['usd']}` | ETH: `${data['ethereum']['usd']}`. ¿Invertimos, Jefe?"
+            await update.message.reply_text(res)
             return
         except:
-            await update.message.reply_text("Jefe, el terminal está fallando. Reintente.")
+            await update.message.reply_text("Jefe, el terminal falló. Reintente.")
             return
 
-    # Respuesta con IA (Groq)
+    # Respuesta con IA
     try:
         completion = client.chat.completions.create(
             model="llama-3.3-70b-versatile",
@@ -38,14 +36,12 @@ async def hablar(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         await update.message.reply_text(completion.choices[0].message.content)
     except:
-        await update.message.reply_text("Dígame, Jefe, ¿qué planes tenemos?")
+        await update.message.reply_text("Dígame, Jefe...")
 
-# --- 3. ARRANQUE DEL BOT ---
+# --- 3. ARRANQUE (AQUÍ SE ARREGLA EL ERROR) ---
 if __name__ == '__main__':
-    print("🚀 Sisi Trader Online (Versión 20)...")
-    # AQUÍ ESTÁ EL CAMBIO CLAVE: Usamos Application en vez de Updater
+    print("🚀 Sisi Trader Online...")
+    # Usamos Application en lugar de Updater para evitar el AttributeError
     app = Application.builder().token(TOKEN_TELEGRAM).build()
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, hablar))
-    
-    # Esto reemplaza al start_polling del Updater viejo
     app.run_polling()
