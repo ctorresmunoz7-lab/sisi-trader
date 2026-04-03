@@ -1,5 +1,5 @@
 import os, datetime, requests, time, pytz, re
-import ccxt 
+import ccxt
 from groq import Groq
 from telegram import Update
 from telegram.ext import Application, MessageHandler, filters, ContextTypes
